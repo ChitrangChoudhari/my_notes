@@ -1,0 +1,91 @@
+import 'package:flutter/material.dart';
+import 'package:my_notes/widgets/note_back_button.dart';
+import 'package:my_notes/widgets/note_form_field.dart';
+import 'package:provider/provider.dart';
+import '../change_notifier/registration_controller.dart';
+import '../core/constants.dart';
+import '../core/validator.dart';
+import '../widgets/note_button.dart';
+
+
+class RecoverPasswordPage extends StatefulWidget {
+  const RecoverPasswordPage({super.key});
+
+  @override
+  State<RecoverPasswordPage> createState() => _RecoverPasswordPageState();
+}
+
+class _RecoverPasswordPageState extends State<RecoverPasswordPage> {
+  late final TextEditingController emailController;
+  GlobalKey<FormFieldState> emailKey=GlobalKey<FormFieldState>();
+
+  @override
+  void initState() {
+    super.initState();
+    emailController=TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: const NoteBackButton(),
+        title: Text('RecoverPassword'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Don\'t worry! Happens to the best of us!',
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24,),
+              NoteFormField(
+                key: emailKey,
+                controller: emailController,
+                fillColor: white,
+                filled: true,
+                labelText: 'Email',
+                validator: Validator.emailValidator,
+              ),
+              SizedBox(height: 24,),
+              SizedBox(
+                height: 48,
+                child: Selector<RegistrationController,bool>(
+                  selector: (_,controller) => controller.isLoading,
+                  builder: (_,isLoading,__) => NoteButton(
+                    child: isLoading
+                        ? SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: white),
+                          )
+                        : const Text('Send me a recovery link!'),
+                    onPressed: isLoading? null:() {
+                      if (emailKey.currentState?.validate()??false){
+                        context.read<RegistrationController>().resetPassword(
+                          context: context,
+                          email: emailController.text.trim(),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      )
+    );
+  }
+}
